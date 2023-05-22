@@ -5,7 +5,7 @@ import mplfinance as mpf
 import datetime
 import streamlit as st
 import requests
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 # from yahooquery import Screener
 
 st.set_page_config(
