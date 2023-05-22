@@ -1,5 +1,4 @@
 import streamlit as st
-from yahooquery import Screener
 from st_pages import Page, add_page_title, show_pages
 
 st.set_page_config(

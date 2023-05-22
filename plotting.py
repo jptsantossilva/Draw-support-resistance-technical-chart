@@ -2,11 +2,8 @@ import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
 import mplfinance as mpf
-# import datetime
 import streamlit as st
-# import requests
-# from bs4 import BeautifulSoup
-# from yahooquery import Screener
+
 
 st.set_page_config(
     # page_title="Hello",
