@@ -11,7 +11,7 @@
             "program": "/home/joao/.local/share/virtualenvs/BSR-slp2C2sE/bin/streamlit",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["run", "Main.py"]
+            "args": ["run", "main.py"]
         }
     ]
 }
