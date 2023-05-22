@@ -1,5 +1,5 @@
 import streamlit as st
-from st_pages import Page, add_page_title, show_pages
+# from st_pages import Page, add_page_title, show_pages
 
 st.set_page_config(
     page_title="Hello",
@@ -7,13 +7,13 @@ st.set_page_config(
     layout="wide"
 )
 
-show_pages(
-    [
-        Page("main.py", "Home", "🏠"),
-        # Can use :<icon-name>: or the actual icon
-        Page("plotting.py", "Plotting", "📈")
-    ]
-)
+# show_pages(
+#     [
+#         Page("main.py", "Home", "🏠"),
+#         # Can use :<icon-name>: or the actual icon
+#         Page("plotting.py", "Plotting", "📈")
+#     ]
+# )
 
 # add_page_title()  # Optional method to add title and icon to current page
 
