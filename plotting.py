@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import mplfinance as mpf
 import datetime
 import streamlit as st
-from yahooquery import Screener
+import requests
+from bs4 import BeautifulSoup
+# from yahooquery import Screener
 
 st.set_page_config(
     # page_title="Hello",
@@ -12,23 +14,33 @@ st.set_page_config(
     # layout="wide"
 )
 
-def get_symbols_list():
-    s = Screener()
-    data = s.get_screeners('all_cryptocurrencies_us')
-    # Access the 'symbol' field from the data object
-    symbols = [item['symbol'] for item in data['all_cryptocurrencies_us']['quotes']]
-    return symbols
+# def get_symbols_list():
+    # s = Screener()
+    # data = s.get_screeners('all_cryptocurrencies_us')
+    # # Access the 'symbol' field from the data object
+    # symbols = [item['symbol'] for item in data['all_cryptocurrencies_us']['quotes']]
+    # count = 50
+    # url = f"https://api.coinmarketcap.com/data/top/mktcaprank/{count}/"
+    # response = requests.get(url)
+    # data = response.json()
+    # tickers = [item['symbol']+"-USD" for item in data]
+    # return tickers
 
-symbols_list = get_symbols_list()
+
+# symbols_list = get_symbols_list()
 
 c1, c2, c3 = st.columns([1,1,1])
 with c1:
     # trading pair
-    default_trading_pair = "BTC-USD"
-    trading_pair = st.selectbox(
-    label='Trading Pair',
-    options=symbols_list,
-    index=0)
+    default_symbol = "BTC"
+    # trading_pair = st.selectbox(
+    #     label='Trading Pair',
+    #     options=symbols_list,
+    # index=0)
+    symbol = st.text_input(
+        label='Symbol',
+        value=default_symbol
+    )
     # st.write('trading_pair: ', trading_pair)
 with c2:
     # timeframe
@@ -84,7 +96,7 @@ def get_historical_data(symbol, period, timeframe):
         df = yf.download(symbol, period=period, interval=timeframe)
         return df
 
-data = get_historical_data(trading_pair, period, timeframe)
+data = get_historical_data(symbol+"-USD", period, timeframe)
 
 supports = data[data.Close == data.Close.rolling(window, center=True).min()].Close       
 resistances = data[data.Close == data.Close.rolling(window, center=True).max()].Close
@@ -110,7 +122,7 @@ joined_list = [[levels_list[i], end_of_lines[i]] for i in range(len(levels_list)
 
 fig, ax = mpf.plot(
     data, 
-    title=f'{trading_pair}',
+    title=f'{symbol}',
     type=chart_type, 
     alines=joined_list, 
     style='charles',
