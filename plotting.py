@@ -21,13 +21,6 @@ def get_symbols_list():
     symbols = [item['symbol'] for item in data['all_cryptocurrencies_us']['quotes']]
     return symbols
 
-    # count = 50
-    # url = f"https://api.coinmarketcap.com/data/top/mktcaprank/{count}/"
-    # response = requests.get(url)
-    # data = response.json()
-    # tickers = [item['symbol']+"-USD" for item in data]
-    # return tickers
-
 
 symbols_list = get_symbols_list()
 
@@ -109,7 +102,10 @@ levels_list = [(index, value) for index, value in levels.items()]
 
 # Get current timestamp
 # Get today's datetime as a Timestamp object
-today = pd.Timestamp.now().normalize()
+# today = pd.Timestamp.now().normalize()
+
+# Get the last date of plotted data
+last_date = data.index[-1]
 
 # end of lines
 end_of_lines = []  # List to store the new items
@@ -117,7 +113,8 @@ end_of_lines = []  # List to store the new items
 # Iterate over the levels2 list and add consecutive items
 for i in range(len(levels_list)):
     last_item = levels_list[i][1]  # Get the last item of the current level
-    new_item = (today, last_item)  # Create a new item with today's datetime and the last item
+    # new_item = (today, last_item)  # Create a new item with today's datetime and the last item
+    new_item = (last_date, last_item)  # Create a new item with today's datetime and the last item
     end_of_lines.append(new_item)
 
 joined_list = [[levels_list[i], end_of_lines[i]] for i in range(len(levels_list))]
