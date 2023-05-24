@@ -1,12 +1,12 @@
 import pandas as pd
-import requests
+import numpy as np
 
 import mplfinance as mpf
+
 import streamlit as st
+
 import yfinance as yf
 from yahooquery import Screener
-# import matplotlib.pyplot as plt
-
 
 # st.set_page_config(
 #     page_title="Hello",
@@ -16,9 +16,22 @@ from yahooquery import Screener
 
 def get_symbols_list():
     s = Screener()
+
+    # crypto
     data = s.get_screeners('all_cryptocurrencies_us')
-    # Access the 'symbol' field from the data object
-    symbols = [item['symbol'] for item in data['all_cryptocurrencies_us']['quotes']]
+    symbols_crypto = [item['symbol'] for item in data['all_cryptocurrencies_us']['quotes']]
+    
+    # etfs us
+    data = s.get_screeners('top_etfs_us')
+    symbols_etfs_us = [item['symbol'] for item in data['top_etfs_us']['quotes']]
+    
+    # all companies within the S&P500
+    tables = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
+    data = tables[0]['Symbol'].tolist()
+    symbols_sp500 = [symbol.replace(".", "-") for symbol in data]
+
+    symbols = symbols_crypto + symbols_etfs_us + symbols_sp500
+
     return symbols
 
 
@@ -75,13 +88,12 @@ with st.sidebar:
     chart_type = st.selectbox('Chart type', options=chart_types, index=chart_types.index('candle'))
 
     window = st.slider(
-        label='Edge Sensitivity', 
+        label='Pivot Sensitivity', 
         min_value=0, 
         max_value=9, 
         value=5,
         step=1)
     window = 50 - (window*5) 
-    # st.write(f"window:{window}")
 
     show_volume = st.checkbox('Show Volume', False)
     # st.form_submit_button('Apply')
@@ -92,6 +104,7 @@ def get_historical_data(symbol, period, timeframe):
         return df
 
 data = get_historical_data(symbol, period, timeframe)
+data.index.name = 'Date'
 
 supports = data[data.Close == data.Close.rolling(window, center=True).min()].Close       
 resistances = data[data.Close == data.Close.rolling(window, center=True).max()].Close
@@ -100,12 +113,8 @@ levels = pd.concat([supports, resistances])
 # list of tuples
 levels_list = [(index, value) for index, value in levels.items()]
 
-# Get current timestamp
-# Get today's datetime as a Timestamp object
-# today = pd.Timestamp.now().normalize()
-
 # Get the last date of plotted data
-last_date = data.index[-1]
+last_date = max(data.index)
 
 # end of lines
 end_of_lines = []  # List to store the new items
@@ -117,18 +126,50 @@ for i in range(len(levels_list)):
     new_item = (last_date, last_item)  # Create a new item with today's datetime and the last item
     end_of_lines.append(new_item)
 
-joined_list = [[levels_list[i], end_of_lines[i]] for i in range(len(levels_list))]
+sr_list = [[levels_list[i], end_of_lines[i]] for i in range(len(levels_list))]
 
-fig, ax = mpf.plot(
-    data, 
-    title=f'{symbol}',
-    type=chart_type, 
-    alines=joined_list, 
-    style='charles',
-    figsize=(15,10),
-    volume=show_volume,
-    # Need this setting for Streamlit
-    returnfig=True
+line_color = '#6993b0'
+
+def plot_all():
+    fig, ax = mpf.plot(
+        data, 
+        title=f'{symbol}',
+        type=chart_type, 
+        alines=dict(alines=sr_list, colors=line_color, alpha=1),
+        # mav=100,
+        # ema=100,
+        
+        style='charles',
+        figsize=(15,10),
+        volume=show_volume,
+        # Need this setting for Streamlit
+        returnfig=True
+        
+        )
     
-    )
-st.pyplot(fig)
+    # Iterate over each aline and add text annotation
+    for aline in sr_list:
+        x = aline[0][0]
+        y = aline[0][1]
+        number = float(aline[0][1])
+        if number >= 1000:
+            formatted_number = int(number)
+        elif number >= 1:
+            formatted_number = np.around(number, decimals=2)
+        else:
+            formatted_number = np.around(number, decimals=6)
+        text = formatted_number
+
+        ax[0].annotate(
+            text, 
+            xy =(len(data), y), 
+            textcoords='offset points', 
+            xytext=(0,0),            
+            color='#3c5c71',
+            alpha=1,
+            verticalalignment='center'
+            )
+
+    st.pyplot(fig)
+
+plot_all()
