@@ -30,7 +30,7 @@ def get_symbols_list():
     data = tables[0]['Symbol'].tolist()
     symbols_sp500 = [symbol.replace(".", "-") for symbol in data]
 
-    symbols = symbols_crypto + symbols_etfs_us + symbols_sp500
+    symbols = symbols_crypto #+ symbols_etfs_us# + symbols_sp500
 
     return symbols
 
